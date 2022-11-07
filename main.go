@@ -2,20 +2,24 @@ package main
 
 import (
 	"cai"
-	"fmt"
 	"net/http"
 )
 
 func main() {
 	r := cai.New()
-	r.GET("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "URL.Path = %q\n", req.URL.Path)
+	r.GET("/", func(c *cai.Context) {
+		c.HTML(http.StatusOK, "<h1>Hello cai</h1>")
+	})
+	r.GET("/hello", func(c *cai.Context) {
+		// expect /hello?name=caiktutu
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
 	})
 
-	r.GET("/hello", func(w http.ResponseWriter, req *http.Request) {
-		for k, v := range req.Header {
-			fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
-		}
+	r.POST("/login", func(c *cai.Context) {
+		c.JSON(http.StatusOK, cai.H{
+			"username": c.PostForm("username"),
+			"password": c.PostForm("password"),
+		})
 	})
 
 	r.Run(":9999")
